@@ -3,6 +3,7 @@ class Posto:
         self.__numero = numero
         self.__fila = fila
         self.__occupato = False
+        self.online = True
 
     def prenota(self):
         if not self.__occupato:
@@ -34,31 +35,62 @@ class Posto:
 
 
 class PostoVIP(Posto):
-    def __init__(self, numero, fila, servizi_extra):
-        super().__init__(numero, fila)
-        self.__servizi_extra = servizi_extra
+    def __init__(self, numero, fila, saldo, online):
+        super().__init__(numero, fila, online)
+        self.__servizi_extra = True
+        self.__saldo = saldo
+        online = True
 
     def prenota(self):
         if not self.is_occupato():
             super().prenota()
-            print(f"Servizi VIP attivati: {', '.join(self.__servizi_extra)}")
+            if self.online:
+                print(f"Servizi VIP attivati con prenotazione online")
+            else:
+                print(f"Posto VIP {self.get_fila()}{self.get_numero()} è già occupato.")
+            
+    def bonus_vip(self):
+        bonus = 10 # bonus di 10 
+        if self.__servizi_extra:
+            self.__saldo += bonus
         else:
-            print(f"Posto VIP {self.get_fila()}{self.get_numero()} è già occupato.")
+            self.__servizi_extra = True
+    
+    def bar(self, menu_bar):
+            menu_bar = {
+        1: {"Caffè" : 1.20},
+        2: {"Cappuccino": 1.80},
+        3: {"Cornetto" : 1.00},
+        4: {"Succo d'arancia" : 2.00},
+        5: {"Tè caldo" :  1.50},
+        6: {"Panino prosciutto e formaggio" : 3.50},
+
+        }
+            nome = (input("Inserisci il nome del prodotto."))
+            for key, values in menu_bar:
+                if key == nome:
+                    self.__saldo -= values
+                else:
+                    print("Prodotto non trovato.")
 
 
 
 
 class PostoStandard(Posto):
-    def __init__(self, numero, fila, costo):
-        super().__init__(numero, fila)
+    def __init__(self, numero, fila, costo, online):
+        super().__init__(numero, fila, online)
         self.__costo = costo
+        online = False
 
     def prenota(self):
-        if not self.is_occupato():
-            print(f"Il costo della prenotazione è di €{self.__costo}")
+        if not self.is_occupato() and self.online:
+            costo_finale  = self.__costo * 1.1 # aumentiamo del 10 %
+            print(f"Il costo della prenotazione è di €{costo_finale} aumentato del 10%")
             super().prenota()
         else:
             print(f"Posto Standard {self.get_fila()}{self.get_numero()} è già occupato.")
+            
+    
 
 
 class Teatro:
