@@ -27,7 +27,7 @@ class Posto:
     def is_occupato(self):
         return self.__occupato
 
-    def __str__(self):
+    def descrizione(self):
         stato = "Occupato" if self.__occupato else "Libero"
         return f"Posto {self.__fila}{self.__numero} - {stato}"
 
