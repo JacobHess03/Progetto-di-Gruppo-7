@@ -1,23 +1,23 @@
 class Posto:
-    def __init__(self, numero, fila):
+    def __init__(self, numero, fila, online = True):
         self.__numero = numero
         self.__fila = fila
         self.__occupato = False
-        self.online = True
+        self.online = online
 
     def prenota(self):
         if not self.__occupato:
             self.__occupato = True
-            print(f"Posto {self.__fila}{self.__numero} prenotato con successo.")
+            print(f"Posto {self.__fila}-{self.__numero} prenotato con successo.")
         else:
-            print(f"Posto {self.__fila}{self.__numero} è già occupato.")
+            print(f"Posto {self.__fila}-{self.__numero} è già occupato.")
 
     def libera(self):
         if self.__occupato:
             self.__occupato = False
-            print(f"Posto {self.__fila}{self.__numero} liberato.")
+            print(f"Posto {self.__fila}-{self.__numero} liberato.")
         else:
-            print(f"Posto {self.__fila}{self.__numero} non era occupato.")
+            print(f"Posto {self.__fila}-{self.__numero} non era occupato.")
 
     def get_numero(self):
         return self.__numero
@@ -30,7 +30,7 @@ class Posto:
 
     def descrizione(self):
         stato = "Occupato" if self.__occupato else "Libero"
-        return f"Posto {self.__fila}{self.__numero} - {stato}"
+        return f"Posto {self.__fila}-{self.__numero} - {stato}"
 
 
 
@@ -47,7 +47,7 @@ class PostoVIP(Posto):
             if self.online:
                 print(f"Servizi VIP attivati con prenotazione online")
             else:
-                print(f"Posto VIP {self.get_fila()}{self.get_numero()} è già occupato.")
+                print(f"Posto VIP {self.get_fila()}-{self.get_numero()} è già occupato.")
             
     def bonus_vip(self):
         bonus = 10 # bonus di 10 
@@ -57,21 +57,16 @@ class PostoVIP(Posto):
             self.__servizi_extra = True
     
     def bar(self, menu_bar):
-            menu_bar = {
-        1: {"Caffè" : 1.20},
-        2: {"Cappuccino": 1.80},
-        3: {"Cornetto" : 1.00},
-        4: {"Succo d'arancia" : 2.00},
-        5: {"Tè caldo" :  1.50},
-        6: {"Panino prosciutto e formaggio" : 3.50},
-
-        }
-            nome = (input("Inserisci il nome del prodotto."))
-            for key, values in menu_bar:
+            menu_bar = {"Caffè" : 1.20, "Cappuccino": 1.80, "Cornetto": 1.00, "Succo d'arancia": 2.00}
+        
+            nome = input("Inserisci il nome del prodotto: ").strip()
+            for key, values in menu_bar.items():
                 if key == nome:
                     self.__saldo -= values
-                else:
-                    print("Prodotto non trovato.")
+                    print("Prodotto acquistato.")
+                    return
+                
+            print("Prodotto non trovato.")
 
 
 
@@ -88,98 +83,99 @@ class PostoStandard(Posto):
             print(f"Il costo della prenotazione è di €{costo_finale} aumentato del 10%")
             super().prenota()
         else:
-            print(f"Posto Standard {self.get_fila()}{self.get_numero()} è già occupato.")
+            print(f"Posto Standard {self.get_fila()}-{self.get_numero()} è già occupato.")
             
     
-
 
 class Teatro:
     def __init__(self):
         self.__posti = []
 
-    def aggiungi_posto(self, posto):
+    def aggiungi_posto_vip(self):
+        fila = input("Inserisci la fila del posto VIP: ").strip().upper()
+        numero = int(input("Inserisci il numero del posto VIP: "))
+        saldo = float(input("Inserisci il saldo iniziale del cliente VIP: "))
+        posto = PostoVIP(numero, fila, saldo, online=True)
         self.__posti.append(posto)
+        print("Posto VIP aggiunto con successo.")
 
-    def prenota_posto(self, numero, fila):
+    def aggiungi_posto_standard(self):
+        fila = input("Inserisci la fila del posto standard: ").strip().upper()
+        numero = int(input("Inserisci il numero del posto standard: "))
+        costo = float(input("Inserisci il costo base del posto: "))
+        posto = PostoStandard(numero, fila, costo, online=True)
+        self.__posti.append(posto)
+        print("Posto Standard aggiunto con successo.")
+
+    def prenota_posto(self):
+        fila = input("Inserisci la fila del posto da prenotare: ").strip().upper()
+        numero = int(input("Inserisci il numero del posto da prenotare: "))
         for posto in self.__posti:
-            if posto.get_numero() == numero and posto.get_fila() == fila:
+            if posto.get_fila() == fila and posto.get_numero() == numero:
                 posto.prenota()
                 return
-        print(f"Nessun posto trovato per fila {fila} numero {numero}.")
+        print("Posto non trovato.")
 
-    def stampa_posti_occupati(self):
-        print("Posti occupati:")
+    def mostra_posti_occupati(self):
         trovati = False
         for posto in self.__posti:
             if posto.is_occupato():
-                print(posto)
+                print(posto.descrizione())
                 trovati = True
         if not trovati:
             print("Nessun posto è attualmente occupato.")
 
+    def bonus_vip_a_tutti(self):
+        for posto in self.__posti:
+            if isinstance(posto, PostoVIP):
+                posto.bonus_vip()
+        print("Bonus VIP accreditati.")
+
+    def usa_bar_vip(self):
+        fila = input("Fila del VIP: ").strip().upper()
+        numero = int(input("Numero del VIP: "))
+        for posto in self.__posti:
+            if posto.get_fila() == fila and posto.get_numero() == numero:
+                if isinstance(posto, PostoVIP):
+                    posto.bar({})
+                    return
+        print("Posto VIP non trovato.")
+        
+        
+
+
 
 def menu_teatro():
     teatro = Teatro()
-
     while True:
-        print("\n--- Menu Teatro ---")
-        print("1. Aggiungi Posto Standard")
-        print("2. Aggiungi Posto VIP")
+        print("\n--- MENU TEATRO ---")
+        print("1. Aggiungi posto VIP")
+        print("2. Aggiungi posto Standard")
         print("3. Prenota un posto")
-        print("4. Libera un posto")
-        print("5. Visualizza posti occupati")
-        print("6. Esci")
+        print("4. Mostra posti occupati")
+        print("5. Aggiungi bonus VIP")
+        print("6. Ordina dal bar (VIP)")
+        print("0. Esci")
 
-        scelta = input("Scegli un'opzione (1-6): ").strip()
+        scelta = input("Seleziona un'opzione: ")
 
         match scelta:
             case "1":
-                try:
-                    numero = int(input("Numero del posto: "))
-                    fila = input("Fila del posto: ").upper().strip()
-                    costo = float(input("Costo del posto: "))
-                    posto = PostoStandard(numero, fila, costo)
-                    teatro.aggiungi_posto(posto)
-                    print("Posto Standard aggiunto.")
-                except:
-                    print("Errore nell'inserimento dei dati.")
-            
+                teatro.aggiungi_posto_vip()
             case "2":
-                try:
-                    numero = int(input("Numero del posto: "))
-                    fila = input("Fila del posto: ").upper().strip()
-                    servizi = input("Servizi extra (separati da virgola): ").split(",")
-                    servizi = [s.strip() for s in servizi if s.strip()]
-                    posto = PostoVIP(numero, fila, servizi)
-                    teatro.aggiungi_posto(posto)
-                    print("Posto VIP aggiunto.")
-                except:
-                    print("Errore nell'inserimento dei dati.")
-            
+                teatro.aggiungi_posto_standard()
             case "3":
-                numero = int(input("Numero del posto da prenotare: "))
-                fila = input("Fila del posto da prenotare: ").upper().strip()
-                teatro.prenota_posto(numero, fila)
-
+                teatro.prenota_posto()
             case "4":
-                numero = int(input("Numero del posto da liberare: "))
-                fila = input("Fila del posto da liberare: ").upper().strip()
-                for posto in teatro._Teatro__posti:
-                    if posto.get_numero() == numero and posto.get_fila() == fila:
-                        posto.libera()
-                        break
-                else:
-                    print("Posto non trovato.")
-
+                teatro.mostra_posti_occupati()
             case "5":
-                teatro.stampa_posti_occupati()
-
+                teatro.bonus_vip_a_tutti()
             case "6":
-                print("Chiusura programma. Arrivederci!")
+                teatro.usa_bar_vip()
+            case "0":
+                print("Chiusura del sistema teatro.")
                 break
-
             case _:
-                print("Scelta non valida. Riprova.")
-
-if __name__ == "__main__":
-    menu_teatro()
+                print("Scelta non valida.")
+                
+menu_teatro()
