@@ -54,7 +54,7 @@ class PostoVIP(Posto):
         if self.__servizi_extra:
             self.__saldo += bonus
         else:
-            self.__servizi_extra = True
+            self.__servizi_extra = False
     
     def bar(self, menu_bar):
             menu_bar = {"Caffè" : 1.20, "Cappuccino": 1.80, "Cornetto": 1.00, "Succo d'arancia": 2.00}
